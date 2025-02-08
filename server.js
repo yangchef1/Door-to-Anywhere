@@ -3,6 +3,8 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 
+const { performance } = require("perf_hooks");
+
 const http = require("http");
 const https = require("https");
 
@@ -30,6 +32,8 @@ app.get("/", (req, res) => {
 });
 
 app.post("/proxy", async (req, res) => {
+  const startTime = performance.now();
+
   try {
     const { url, method = "GET", headers = {}, body = null } = req.body;
 
@@ -46,6 +50,9 @@ app.post("/proxy", async (req, res) => {
       httpAgent: getAgent(url),
       httpsAgent: getAgent(url),
     });
+
+    const endTime = performance.now();
+    console.log((endTime - startTime).toFixed(2));
 
     res.status(response.status).json(response.data);
   } catch (error) {

@@ -3,6 +3,19 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 
+const http = require("http");
+const https = require("https");
+
+const agentOptions = {
+  keepAlive: true,
+  maxSockets: 10,
+};
+
+const httpAgent = new http.Agent(agentOptions);
+const httpsAgent = new https.Agent(agentOptions);
+
+const getAgent = (url) => (url.startsWith("https") ? httpsAgent : httpAgent);
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
@@ -30,6 +43,8 @@ app.post("/proxy", async (req, res) => {
       headers,
       data: body,
       timeout: 10000,
+      httpAgent: getAgent(url),
+      httpsAgent: getAgent(url),
     });
 
     res.status(response.status).json(response.data);
